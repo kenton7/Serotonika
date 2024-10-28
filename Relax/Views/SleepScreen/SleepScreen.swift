@@ -39,11 +39,7 @@ struct SleepScreen: View {
             }
         }
         .refreshable {
-            Task {
-                await MainActor.run {
-                    nightStoriesVM.fetchNightStories()
-                }
-            }
+            nightStoriesVM.fetchNightStories()
         }
     }
 }
@@ -71,10 +67,11 @@ struct HeaderView: View {
                     Text("Истории на ночь")
                         .padding()
                         .foregroundStyle(.white)
-                        .font(.system(.title, design: .rounded, weight: .bold))
+                        .font(.system(size: 25, weight: .bold, design: .rounded))
                     Text("Успокаивающие сказки на ночь помогут вам погрузиться в глубокий и естественный сон")
                         .foregroundStyle(.white)
-                        .font(.system(.headline, design: .rounded, weight: .light))
+                        .padding(.horizontal)
+                        .font(.system(size: 20, weight: .light, design: .rounded))
                         .multilineTextAlignment(.center)
                 }
                 .offset(y: isShowing ? 0 : -1000)
@@ -193,16 +190,17 @@ struct AllStoriesView: View {
                             VStack {
                                 HStack {
                                     Text(story.name)
-                                        .padding(10)
+                                        .padding()
                                         .foregroundStyle(.white)
-                                        .bold()
                                         .multilineTextAlignment(.leading)
+                                        .font(.system(size: 17, weight: .bold, design: .rounded))
                                     Spacer()
                                 }
                                 
                                 HStack {
                                     Text("\(story.duration) мин • \(story.type.rawValue)")
-                                        .padding(.horizontal, 10)
+                                        //.padding(.horizontal, 10)
+                                        .padding(.horizontal)
                                         .foregroundStyle(Color(uiColor: .init(red: 152/255,
                                                                               green: 161/255,
                                                                               blue: 189/255,
@@ -221,7 +219,7 @@ struct AllStoriesView: View {
                                .offset(x: isShowing ? 0 : -1000)
                                .animation(.bouncy, value: isShowing)
                                .onAppear {
-                                   nightStoriesVM.filterResults(by: "Всё")
+                                   //nightStoriesVM.filterResults(by: "Всё")
                                }
         }
         .navigationDestination(isPresented: $isSelected) {

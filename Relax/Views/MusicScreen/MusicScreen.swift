@@ -12,22 +12,28 @@ import Kingfisher
 struct MusicScreen: View {
     @StateObject private var viewModel = MusicFilesViewModel()
     @State private var isShowing = false
+    @State private var isScrolling = false
+    @AppStorage("activeDarkModel") private var activeDarkModel = false
     
     var body: some View {
         NavigationStack {
             ScrollView(showsIndicators: false) {
                 MusicHeaderView(isShowing: $isShowing)
+                    .padding(.top)
                 AllMusicPlaylists(isShowing: $isShowing)
                     .environmentObject(viewModel)
+                    .modifier(ScrollTrackingModifier(isScrolling: $isScrolling))
             }
-            .onAppear {
-                isShowing = true
-            }
-            .onDisappear {
-                isShowing = false
-            }
+            .modifier(HeaderModifier(isScrolling: $isScrolling, title: "Музыка", activeDarkModel: $activeDarkModel, isShowing: $isShowing))
         }
+        
         .padding(.bottom)
+        .onAppear {
+            isShowing = true
+        }
+        .onDisappear {
+            isShowing = false
+        }
         .refreshable {
             Task {
                 await MainActor.run {
@@ -46,24 +52,18 @@ struct MusicHeaderView: View {
     
     var body: some View {
         VStack {
-            Text("Музыка")
-                .padding()
-                .foregroundStyle(activeDarkModel ? .white : .black)
-                .font(.system(.title, design: .rounded, weight: .bold))
-            
             Text("Насладитесь успокаивающей музыкой, которая поможет вам снять стресс и найти внутреннее спокойствие.")
                 .padding()
                 .foregroundStyle(activeDarkModel ? .white : Color(uiColor: .init(red: 160/255,
                                                                                  green: 163/255,
                                                                                  blue: 177/255,
                                                                                  alpha: 1)))
-                .font(.system(.headline, design: .rounded, weight: .light))
+                .font(.system(size: 20, weight: .light, design: .rounded))
                 .multilineTextAlignment(.center)
-            Spacer()
+                .offset(x: isShowing ? 0 : -1000)
+                .animation(.bouncy, value: isShowing)
         }
         .padding(.vertical)
-        .offset(y: isShowing ? 0 : -1000)
-        .animation(.bouncy, value: isShowing)
     }
 }
 

@@ -28,7 +28,10 @@ struct PasswordFieldView: View {
                 ZStack(alignment: .leading) {
                 SecureField("", text: $text)
                     .padding()
-                    .background(activeDarkModel ? .black : Color(uiColor: .init(red: 242/255, green: 243/255, blue: 247/255, alpha: 1)))
+                    .background(activeDarkModel ? Color(uiColor: .init(red: 41/255,
+                                                                       green: 42/255,
+                                                                       blue: 47/255,
+                                                                       alpha: 1)) : Color(uiColor: .init(red: 242/255, green: 243/255, blue: 247/255, alpha: 1)))
                     .clipShape(.rect(cornerRadius: 8))
                     .padding()
                     .autocorrectionDisabled(true)
@@ -48,7 +51,10 @@ struct PasswordFieldView: View {
                     ZStack(alignment: .leading) {
                         TextField("", text: $text)
                             .padding()
-                            .background(activeDarkModel ? .black : Color(uiColor: .init(red: 242/255, green: 243/255, blue: 247/255, alpha: 1)))
+                            .background(activeDarkModel ? Color(uiColor: .init(red: 41/255,
+                                                                               green: 42/255,
+                                                                               blue: 47/255,
+                                                                               alpha: 1)) : Color(uiColor: .init(red: 242/255, green: 243/255, blue: 247/255, alpha: 1)))
                             .clipShape(.rect(cornerRadius: 8))
                             .padding()
                             .autocorrectionDisabled(true)
@@ -76,6 +82,7 @@ struct PasswordFieldView: View {
                 }
                 .padding(.horizontal)
         }
+        .font(.system(size: 17, weight: .light, design: .rounded))
     }
 }
 

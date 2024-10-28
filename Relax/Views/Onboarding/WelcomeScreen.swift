@@ -27,7 +27,7 @@ struct WelcomeScreen: View {
                 VStack {
                     Text("Серотоника")
                         .padding()
-                        .font(.system(.title2, design: .rounded)).bold()
+                        .font(.system(size: 20, weight: .bold, design: .rounded))
                         .foregroundStyle(activeDarkModel ? .white : .black)
                     
                     Spacer()
@@ -37,14 +37,14 @@ struct WelcomeScreen: View {
                             .padding(.bottom)
                             .multilineTextAlignment(.center)
                             .textInputAutocapitalization(.words)
-                            .font(.system(.title, design: .rounded)).bold()
+                            .font(.system(size: 25, weight: .bold, design: .rounded))
                             .foregroundStyle(.white)
                     }
                     
                     Text("Найдите внутренний покой и гармонию, следуя нашим медитациям каждый день.")
                         .padding(.horizontal)
                         .foregroundStyle(.white)
-                        .font(.system(.subheadline, design: .rounded, weight: .light))
+                        .font(.system(size: 20, weight: .bold, design: .rounded))
                         .multilineTextAlignment(.center)
                     
                     UserLearningAnimation()
@@ -59,6 +59,7 @@ struct WelcomeScreen: View {
                             HStack {
                                 Text("Давайте начнём")
                                     .foregroundStyle(.black)
+                                    .font(.system(size: 17, weight: .bold, design: .rounded))
                                     .frame(maxWidth: .infinity)
                             }
                             .contentShape(.rect)

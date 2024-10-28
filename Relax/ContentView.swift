@@ -31,7 +31,7 @@ struct ContentView: View {
         Group {
             if isLoading {
                 LoadingAnimation()
-            } else if (authViewModel.signedIn || yandexViewModel.isLoggedIn) /*&& isViewed*/ && databaseVM.isTutorialViewed {
+            } else if (authViewModel.signedIn || yandexViewModel.isLoggedIn) && databaseVM.isTutorialViewed {
                 CustomTabBar()
                     .navigationBarBackButtonHidden()
             } else {
@@ -40,13 +40,10 @@ struct ContentView: View {
                 }
             }
         }
-        
-        //ВРОДЕ РАБОЧИЙ ВАРИАНТ ТАК КАК ДОЛЖНО БЫТЬ
         .onAppear {
             authViewModel.signedIn = authViewModel.isUserLoggedIn
         }
         .task {
-            
             if let firebaseUserID = Auth.auth().currentUser?.uid {
                 isViewed = await databaseVM.checkIfUserViewedTutorial(userID: firebaseUserID)
                 databaseVM.isTutorialViewed = isViewed
@@ -79,45 +76,5 @@ struct ContentView: View {
                 }
             }
         }
-        //САМЫЙ ПЕРВЫЙ ВАРИАНТ
-        //------------------------------------------------------------------
-        //        .onAppear {
-        //            authViewModel.signedIn = authViewModel.isUserLoggedIn
-        //            if !authViewModel.signedIn {
-        //                databaseVM.isTutorialViewed = false
-        //                isLoading = false
-        //            }
-        //            if !yandexViewModel.isLoggedIn && !databaseVM.isTutorialViewed {
-        //                //isLoading = false
-        //                Task {
-        //                    if let userID = Auth.auth().currentUser?.uid {
-        //                        await databaseVM.checkIfFirebaseUserViewedTutorial(userID: userID)
-        //                        await MainActor.run {
-        //                            self.isLoading = false
-        //                        }
-        //                    }
-        //                }
-        //                //isLoading = false
-        //            }
-        //        }
-        //        .onChange(of: yandexViewModel.clientID) { newValue in
-        //            if !newValue.isEmpty {
-        //                Task {
-        //                    await databaseVM.checkIfFirebaseUserViewedTutorial(userID: newValue)
-        //                    await MainActor.run {
-        //                        self.isLoading = false
-        //                    }
-        //                }
-        //            }
-        //        }
-        //        .onChange(of: yandexViewModel.isLoggedIn) { newValue in
-        //            if !newValue {
-        //                isLoading = false
-        //            }
-        //        }
-        //        .onChange(of: databaseVM.isTutorialViewed) { newValue in
-        //            print("onChange сработал, databaseVM.isTutorialViewed изменилось на \(newValue)")
-        //            isLoading = false
-        //        }
     }
 }

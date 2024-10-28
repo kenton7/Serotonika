@@ -21,7 +21,7 @@ struct ForgotPasswordView: View {
         VStack {
             Text("Введите электронную почту, на которую зарегистрирован ваш аккаунт")
                 .padding()
-                .font(.system(.title, design: .rounded, weight: .bold))
+                .font(.system(size: 25, weight: .bold, design: .rounded))
                 .multilineTextAlignment(.center)
             Spacer()
             EmailFieldView("Email", email: $email)
@@ -41,6 +41,7 @@ struct ForgotPasswordView: View {
             }, label: {
                 Text("Сбросить пароль")
                     .foregroundStyle(.white)
+                    .font(.system(size: 20, weight: .bold, design: .rounded))
             })
             .padding()
             .frame(maxWidth: .infinity)

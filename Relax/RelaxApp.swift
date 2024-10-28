@@ -10,6 +10,7 @@ import FirebaseCore
 import CoreData
 import AVFoundation
 import YandexLoginSDK
+import RevenueCat
 
 class AppDelegate: NSObject, UIApplicationDelegate {
     func application(_ application: UIApplication,
@@ -17,7 +18,6 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         FirebaseApp.configure()
         setupAudioSession()
         
-        //let yandexViewModel = YandexAuthorization.shared
         do {
             try YandexLoginSDK.shared.activate(with: .yandexLoginSDKClientID, authorizationStrategy: .default)
         } catch {
@@ -80,6 +80,7 @@ struct RelaxApp: App {
     @AppStorage("toogleDarkMode") private var toogleDarkMode = false
     @AppStorage("activeDarkModel") private var activeDarkModel = false
     
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
@@ -93,9 +94,9 @@ struct RelaxApp: App {
                 .environmentObject(premuimViewModel)
                 .environmentObject(downloadManager)
                 .environmentObject(navigationService)
-                .task {
-                    await premuimViewModel.updatePurchasedProducts()
-                }
+//                .task {
+//                    await premuimViewModel.updatePurchasedProducts()
+//                }
                 .environment(\.colorScheme, activeDarkModel ? .dark : .light)
                 //.environment(\.colorScheme, .light)
         }

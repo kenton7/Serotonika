@@ -42,6 +42,7 @@ struct ProfileScreen: View {
     @State private var currentStateImage: UIImage?
     @State private var previousStateImage: UIImage?
     @State private var maskAnimation: Bool = false
+    @State private var isProfile = true
     let fileManagerService: IFileManagerSerivce = FileManagerSerivce()
     @EnvironmentObject private var emailService: EmailService
     
@@ -53,6 +54,9 @@ struct ProfileScreen: View {
                     Section("Настройки") {
                         NavigationLink {
                             AccountScreen()
+                                .onAppear {
+                                    isProfile = false
+                                }
                         } label: {
                             HStack {
                                 Image("account")
@@ -64,6 +68,9 @@ struct ProfileScreen: View {
                         
                         NavigationLink {
                             RemindersScreen(isFromSettings: true)
+                                .onAppear {
+                                    isProfile = false
+                                }
                         } label: {
                             HStack {
                                 Image("notifications")
@@ -85,27 +92,39 @@ struct ProfileScreen: View {
                         })
                         .sheet(isPresented: $isBuyPremiumPressed, content: {
                             PremiumScreen()
+                                .onAppear {
+                                    isProfile = false
+                                }
                         })
                     }
                     
                     Section("Материалы") {
-                            NavigationLink {
-                                if premiumViewModel.hasUnlockedPremuim {
-                                    DownloadedScreen(fileManagerSerivce: fileManagerService)
-                                } else {
-                                    PremiumScreen()
-                                }
-                            } label: {
-                                HStack {
-                                    Image("downloaded")
-                                        .resizable()
-                                        .frame(width: 20, height: 20)
-                                    Text("Скачанное")
-                                }
+                        NavigationLink {
+                            if premiumViewModel.hasUnlockedPremuim {
+                                DownloadedScreen(fileManagerSerivce: fileManagerService)
+                                    .onAppear {
+                                        isProfile = false
+                                    }
+                            } else {
+                                PremiumScreen()
+                                    .onAppear {
+                                        isProfile = false
+                                    }
                             }
+                        } label: {
+                            HStack {
+                                Image("downloaded")
+                                    .resizable()
+                                    .frame(width: 20, height: 20)
+                                Text("Скачанное")
+                            }
+                        }
                         
                         NavigationLink {
                             UserLikedPlaylistsScreen()
+                                .onAppear {
+                                    isProfile = false
+                                }
                         } label: {
                             HStack {
                                 Image("like")
@@ -114,7 +133,7 @@ struct ProfileScreen: View {
                                 Text("Вам понравилось")
                             }
                         }
-
+                        
                     }
                     
                     Section("Помощь") {
@@ -128,25 +147,26 @@ struct ProfileScreen: View {
                                     .resizable()
                                     .frame(width: 20, height: 20)
                                 Text("Связаться с разработчиком")
+                                
                             }
                         })
                         
-                        Button(action: {
-                            aboutUsPressed = true
-                        }, label: {
-                            HStack {
-                                Image("aboutUs")
-                                    .resizable()
-                                    .frame(width: 20, height: 20)
-                                Text("О нас")
-                            }
-                        })
-                        .sheet(isPresented: $aboutUsPressed, content: {
-                            WebView(url: URL(string: "https://firebasestorage.googleapis.com/v0/b/relax-8e1d3.appspot.com/o/aboutUs.rtf?alt=media&token=64393fb2-c94c-4f6b-a904-1688cb4c2a65")!)
-                                .ignoresSafeArea()
-                                .navigationTitle("О нас")
-                                .navigationBarTitleDisplayMode(.inline)
-                        })
+                        //                        Button(action: {
+                        //                            aboutUsPressed = true
+                        //                        }, label: {
+                        //                            HStack {
+                        //                                Image("aboutUs")
+                        //                                    .resizable()
+                        //                                    .frame(width: 20, height: 20)
+                        //                                Text("О нас")
+                        //                            }
+                        //                        })
+                        //                        .sheet(isPresented: $aboutUsPressed, content: {
+                        //                            WebView(url: URL(string: "https://firebasestorage.googleapis.com/v0/b/relax-8e1d3.appspot.com/o/aboutUs.rtf?alt=media&token=64393fb2-c94c-4f6b-a904-1688cb4c2a65")!)
+                        //                                .ignoresSafeArea()
+                        //                                .navigationTitle("О нас")
+                        //                                .navigationBarTitleDisplayMode(.inline)
+                        //                        })
                     }
                     
                     Button(action: {
@@ -166,17 +186,23 @@ struct ProfileScreen: View {
                         }
                     })
                 }
+                .scrollIndicators(.hidden)
                 .foregroundStyle(toogleDarkMode ? .white : .black)
+                .font(.system(size: 20, weight: .regular, design: .rounded))
                 
-//                VStack {
-//                     Text("Версия: \(Bundle.main.appVersion)")
-//                     Text("Сборка: \(Bundle.main.appBuild)")
-//                 }
-//                 .padding()
-//                 .foregroundStyle(Color(uiColor: .secondaryTextColor))
-//                 .font(.system(size: 12, weight: .light, design: .rounded))
-//                 .padding(.bottom)
+                //                VStack {
+                //                     Text("Версия: \(Bundle.main.appVersion)")
+                //                     Text("Сборка: \(Bundle.main.appBuild)")
+                //                 }
+                //                 .padding()
+                //                 .foregroundStyle(Color(uiColor: .secondaryTextColor))
+                //                 .font(.system(size: 12, weight: .light, design: .rounded))
+                //                 .padding(.bottom)
             }
+            .onAppear {
+                isProfile = true
+            }
+            .font(.system(size: 20, weight: .regular, design: .rounded))
             .navigationTitle(userName)
         }
         .tint(activeDarkModel ? .white : .black)
@@ -191,67 +217,71 @@ struct ProfileScreen: View {
                       currentImage: $currentStateImage,
                       previousImage: $previousStateImage,
                       activateDarkMode: $activeDarkModel)
+        //Логика кнопки смены темы
         .overlay {
-            GeometryReader(content: { geometry in
-                let size = geometry.size
-                if let previousStateImage, let currentStateImage {
-                    ZStack {
-                        Image(uiImage: previousStateImage)
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: size.width, height: size.height)
-                        
-                        Image(uiImage: currentStateImage)
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: size.width, height: size.height)
-                            .mask(alignment: .topLeading) {
-                                Circle()
-                                    .frame(width: buttonRect.width * (maskAnimation ? 80 : 1), height: buttonRect.height * (maskAnimation ? 80 : 1), alignment: .bottomLeading)
-                                    .frame(width: buttonRect.width, height: buttonRect.height)
-                                    .offset(x: buttonRect.minX, y: buttonRect.minY)
-                                    .ignoresSafeArea()
-                            }
-                    }
-                    .task {
-                        guard !maskAnimation else { return }
-                        if #available(iOS 17.0, *) {
-                            withAnimation(.easeInOut(duration: 0.9), completionCriteria: .logicallyComplete) {
-                                maskAnimation = true
-                            } completion: {
-                                self.currentStateImage = nil
-                                self.previousStateImage = nil
-                                maskAnimation = false
-                            }
-                        } else {
-                            withAnimation(.easeInOut(duration: 0.9)) {
-                                self.currentStateImage = nil
-                                self.previousStateImage = nil
-                                maskAnimation = false
-                            }
+            if isProfile {
+                GeometryReader(content: { geometry in
+                    let size = geometry.size
+                    if let previousStateImage, let currentStateImage {
+                        ZStack {
+                            Image(uiImage: previousStateImage)
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: size.width, height: size.height)
+                            
+                            Image(uiImage: currentStateImage)
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: size.width, height: size.height)
+                                .mask(alignment: .topLeading) {
+                                    Circle()
+                                        .frame(width: buttonRect.width * (maskAnimation ? 80 : 1), height: buttonRect.height * (maskAnimation ? 80 : 1), alignment: .bottomLeading)
+                                        .frame(width: buttonRect.width, height: buttonRect.height)
+                                        .offset(x: buttonRect.minX, y: buttonRect.minY)
+                                        .ignoresSafeArea()
+                                }
                         }
-
+                        .task {
+                            guard !maskAnimation else { return }
+                            if #available(iOS 17.0, *) {
+                                withAnimation(.easeInOut(duration: 0.9), completionCriteria: .logicallyComplete) {
+                                    maskAnimation = true
+                                } completion: {
+                                    self.currentStateImage = nil
+                                    self.previousStateImage = nil
+                                    maskAnimation = false
+                                }
+                            } else {
+                                withAnimation(.easeInOut(duration: 0.9)) {
+                                    self.currentStateImage = nil
+                                    self.previousStateImage = nil
+                                    maskAnimation = false
+                                }
+                            }
+                            
+                        }
                     }
-                }
-            })
-            .mask({
-                Rectangle()
-                    .overlay(alignment: .topLeading) {
-                        Circle()
-                            .frame(width: buttonRect.width, height: buttonRect.height)
-                            .offset(x: buttonRect.minX, y: buttonRect.minY)
-                            .blendMode(.destinationOut)
-                    }
-            })
-            .ignoresSafeArea()
+                })
+                .mask({
+                    Rectangle()
+                        .overlay(alignment: .topLeading) {
+                            Circle()
+                                .frame(width: buttonRect.width, height: buttonRect.height)
+                                .offset(x: buttonRect.minX, y: buttonRect.minY)
+                                .blendMode(.destinationOut)
+                        }
+                })
+                .ignoresSafeArea()
+            }
         }
         .overlay(alignment: .topTrailing) {
+            if isProfile {
             if #available(iOS 17.0, *) {
                 Button(action: {
                     toogleDarkMode.toggle()
                 }, label: {
                     Image(systemName: toogleDarkMode ? "sun.max.fill" : "moon.fill")
-                        .font(.title2)
+                        .font(.system(size: 20, weight: .bold, design: .rounded))
                         .foregroundStyle(toogleDarkMode ? .white : .primary)
                         .symbolEffect(.bounce, value: toogleDarkMode)
                         .frame(width: 40, height: 40)
@@ -265,7 +295,7 @@ struct ProfileScreen: View {
                     toogleDarkMode.toggle()
                 }, label: {
                     Image(systemName: toogleDarkMode ? "sun.max.fill" : "moon.fill")
-                        .font(.title2)
+                        .font(.system(size: 20, weight: .bold, design: .rounded))
                         .foregroundStyle(.primary)
                         .frame(width: 40, height: 40)
                 })
@@ -276,6 +306,19 @@ struct ProfileScreen: View {
                 .disabled(currentStateImage != nil || previousStateImage != nil || maskAnimation)
             }
         }
-        .preferredColorScheme(activeDarkModel ? .dark : .light)
+    }
+            .preferredColorScheme(activeDarkModel ? .dark : .light)
+            .overlay(alignment: .bottom) {
+                if isProfile {
+                HStack {
+                    Text("Версия: \(Bundle.main.appVersion), сборка: \(Bundle.main.appBuild)")
+                    //Text("Сборка: \(Bundle.main.appBuild)")
+                }
+                .padding()
+                .foregroundStyle(Color(uiColor: .secondaryTextColor))
+                .font(.system(size: 12, weight: .light, design: .rounded))
+                .padding(.bottom)
+            }
+        }
     }
 }

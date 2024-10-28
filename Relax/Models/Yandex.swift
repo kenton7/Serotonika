@@ -23,5 +23,5 @@ struct YandexUserInfo: Codable {
     let real_name: String?
     let client_id: String?
     let sex: String?
-    let default_phone: YandexPhoneNumber
+   // let default_phone: YandexPhoneNumber
 }

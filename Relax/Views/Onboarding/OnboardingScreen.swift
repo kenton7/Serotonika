@@ -24,24 +24,27 @@ struct OnboardingScreen: View {
                 }
                 VStack {
                     Text("Серотоника")
-                        .font(.system(.title, design: .rounded)).bold()
+                        .font(.system(size: 25, weight: .bold, design: .rounded))
                         .foregroundStyle(.black)
                     OnboardingAnimation()
                         .frame(width: 200, height: 200)
                     Spacer()
                     Text("Привет!")
-                        .font(.title).bold()
+                        .font(.system(size: 20, weight: .bold, design: .rounded))
+                        .padding(.bottom)
                     Text("Добро пожаловать в наше приложение для медитации! Мы здесь, чтобы помочь вам найти внутренний покой и гармонию. Наши специально разработанные медитации и упражнения направлены на улучшение вашего самочувствия, снижение стресса и повышение концентрации. Начните свой путь к спокойствию и самосовершенствованию уже сегодня!")
                         .padding(.horizontal)
-                        .font(.system(.callout, design: .rounded, weight: .light))
+                        .font(.system(size: 16, weight: .light, design: .rounded))
                         .foregroundStyle(Color(uiColor: .gray))
                         .multilineTextAlignment(.center)
+                        .padding(.horizontal)
                     
                     NavigationLink {
                         RegisterView()
                     } label: {
                         Text("Зарегистрироваться")
                             .foregroundStyle(.white)
+                            .font(.system(size: 17, weight: .bold, design: .rounded))
                     }
                     .padding()
                     .background(Color(uiColor: .defaultButtonColor))
@@ -50,9 +53,13 @@ struct OnboardingScreen: View {
                     
                     HStack {
                         Text("Уже есть аккаунт?")
-                            .font(.system(.callout, design: .rounded, weight: .light))
-                        Button("Войти") {
+                            .font(.system(size: 15, weight: .bold, design: .rounded))
+                        Button {
                             hasAccount = true
+                        } label: {
+                            Text("Войти")
+                                .foregroundStyle(.blue)
+                                .font(.system(size: 15, weight: .bold, design: .rounded))
                         }
                         .foregroundStyle(.blue)
                     }

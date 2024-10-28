@@ -38,7 +38,7 @@ struct UserInterestsTopicScreen: View {
                                 .padding(.top)
                                 .padding(.horizontal)
                                 .foregroundStyle(activeDarkModel ? .white : Color(uiColor: .init(red: 63/255, green: 65/255, blue: 78/255, alpha: 1)))
-                                .font(.system(.title2, design: .rounded, weight: .bold))
+                                .font(.system(size: 20, weight: .bold, design: .rounded))
                                 .multilineTextAlignment(.leading)
                             Spacer()
                         }
@@ -47,6 +47,7 @@ struct UserInterestsTopicScreen: View {
                         HStack {
                             Text("Выберите темы, \nна которых вы хотели бы сфокусироваться:")
                                 .padding(.horizontal)
+                                .font(.system(size: 17, weight: .light, design: .rounded))
                                 .foregroundStyle(activeDarkModel ? .white : Color(uiColor: .init(red: 161/255, green: 164/255, blue: 178/255, alpha: 1)))
                             Spacer()
                         }
@@ -68,6 +69,7 @@ struct UserInterestsTopicScreen: View {
                             HStack {
                                 Text("Продолжить")
                                     .foregroundStyle(.white)
+                                    .font(.system(size: 17, weight: .bold, design: .rounded))
                                     .frame(maxWidth: .infinity)
                             }
                             .contentShape(.rect)
@@ -91,7 +93,6 @@ struct UserInterestsTopicScreen: View {
             RemindersScreen(isFromSettings: false)
         })
         .task {
-            //await coursesVM.getCourses(isDaily: false)
             await coursesVM.getCoursesNew(isDaily: false, path: .allCourses)
         }
         .navigationBarBackButtonHidden()
@@ -133,6 +134,7 @@ struct TopicButton: View {
                         .resizable()
                         .placeholder {
                             LoadingAnimation()
+                                .frame(width: 40, height: 40)
                         }
                         .scaledToFit()
                         .clipShape(.rect(cornerRadius: 16))

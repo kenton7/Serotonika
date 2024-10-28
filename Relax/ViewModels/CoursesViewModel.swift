@@ -14,11 +14,6 @@ import Combine
 
 final class CoursesViewModel: ObservableObject {
     
-    enum PathToMaterialOfDay: String {
-        case playlist = "playlistOfDay"
-        case meditation = "courseOfDay"
-    }
-    
     enum Paths: String {
         case allCourses = "courses"
         case allPlaylists = "music"
@@ -31,26 +26,13 @@ final class CoursesViewModel: ObservableObject {
     @Published var dailyRecommendations: [CourseAndPlaylistOfDayModel] = []
     @Published var playlists: [CourseAndPlaylistOfDayModel] = []
     @Published var nightStories: [CourseAndPlaylistOfDayModel] = []
-    @Published var isPlaying: Bool = false
-    @Published var likesCount = 0
     @Published var filteredStories: [CourseAndPlaylistOfDayModel] = []
     @Published var userLikedMaterials: [CourseAndPlaylistOfDayModel] = []
     @Published var dailyCourses: [CourseAndPlaylistOfDayModel] = []
-    @Published var isSelected = false
+    @Published var newMaterials: [CourseAndPlaylistOfDayModel] = []
     @Published var lessons: [Lesson] = []
     private var playerViewModel = PlayerViewModel.shared
     private let yandexViewModel = YandexAuthorization.shared
-    private var cancellables = Set<AnyCancellable>()
-    private var lastUpdate: Date?
-    var dailyCourse: CourseAndPlaylistOfDayModel?
-    
-    init() {
-//        playerViewModel.$isPlaying
-//            .receive(on: RunLoop.main)
-//            .assign(to: \.isPlaying, on: self)
-//            .store(in: &cancellables)
-//        lastUpdate = UserDefaults.standard.object(forKey: "lastUpdate") as? Date
-    }
     
     func fetchCourseDetails(type: Types, courseID: String) async -> [Lesson] {
         var pathToLesson: DatabaseReference = Database.database(url: .databaseURL).reference().child("courses").child(courseID).child("lessons")
@@ -88,14 +70,14 @@ final class CoursesViewModel: ObservableObject {
             }
         }
     }
-
-    @MainActor
-    func getCoursesNew(isDaily: Bool, path: Paths) async {
+    
+    func getCoursesNew(isDaily: Bool = false, path: Paths) async {
         let databaseURL = Database.database(url: .databaseURL).reference().child(path.rawValue)
         
         do {
             let snapshot = try await databaseURL.getData()
             var tempCourses: [CourseAndPlaylistOfDayModel] = []
+            
             for child in snapshot.children {
                 if let snapshot = child as? DataSnapshot, let data = snapshot.value as? [String: Any] {
                     let jsonData = try JSONSerialization.data(withJSONObject: data)
@@ -103,77 +85,75 @@ final class CoursesViewModel: ObservableObject {
                     tempCourses.append(courseData)
                 }
             }
-            if isDaily {
-                self.allCourses = tempCourses
-                self.dailyCourses = allCourses.filter { $0.isDaily == true }
-            } else {
-                switch path {
-                case .allCourses:
-                    self.allCourses = tempCourses
-                case .allPlaylists:
-                    self.playlists = tempCourses
-                case .nightStories:
-                    self.nightStories = tempCourses
-                case .emergencyMeditations:
-                    self.emergencyMeditations = tempCourses
+            
+            let coursesToUpdate = tempCourses
+            
+            await MainActor.run {
+                if isDaily {
+                    self.allCourses = coursesToUpdate
+                    self.dailyCourses = self.allCourses.filter { $0.isDaily == true }
+                } else {
+                    switch path {
+                    case .allCourses:
+                        self.allCourses = coursesToUpdate
+                    case .allPlaylists:
+                        self.playlists = coursesToUpdate
+                    case .nightStories:
+                        self.nightStories = coursesToUpdate
+                    case .emergencyMeditations:
+                        self.emergencyMeditations = coursesToUpdate
+                    }
                 }
             }
         } catch {
             print("Error decoding snapshot: \(error)")
         }
-
     }
 
     
-//    @MainActor
-//    func getCourses(isDaily: Bool) async {
-//        let databaseURL = Database.database(url: .databaseURL).reference().child("courses")
-//        do {
-//            let snapshot = try await databaseURL.getData()
-//            var localCourses: [CourseAndPlaylistOfDayModel] = []
-//            for child in snapshot.children {
-//                if let snapshot = child as? DataSnapshot, let data = snapshot.value as? [String: Any] {
-//                    let jsonData = try JSONSerialization.data(withJSONObject: data)
-//                    let courseData = try JSONDecoder().decode(CourseAndPlaylistOfDayModel.self, from: jsonData)
-//                    localCourses.append(courseData)
-//                }
-//            }
-//            if isDaily {
-//                self.allCourses = localCourses
-//                self.dailyCourses = allCourses.filter { $0.isDaily == true }
-//            } else {
-//                self.allCourses = localCourses
-//                self.filteredStories = localCourses
-//                self.likesCount = localCourses.reduce(0) { $0 + $1.likes }
-//            }
-//        } catch {
-//            print("Error decoding snapshot: \(error)")
-//        }
-//    }
+    func getNewMaterials(path: Paths = .allCourses) async {
+        let databaseURL = Database.database(url: .databaseURL).reference().child(path.rawValue)
+        do {
+            let snapshot = try await databaseURL.getData()
+            let localMaterials = try snapshot.children.compactMap { child -> CourseAndPlaylistOfDayModel? in
+                if let snapshot = child as? DataSnapshot, let data = snapshot.value as? [String: Any] {
+                    let jsonData = try JSONSerialization.data(withJSONObject: data, options: .prettyPrinted)
+                    return try JSONDecoder().decode(CourseAndPlaylistOfDayModel.self, from: jsonData)
+                }
+                return nil
+            }
+            await MainActor.run {
+                self.newMaterials = localMaterials.filter { $0.isNew == true }
+            }
+        } catch {
+            print("Error decoding snapshot: \(error)")
+        }
+    }
     
-//    @MainActor
-//    func filterResults(by genre: String) async {
-//        if genre == "Всё" {
-//            await getCourses(isDaily: false)
-//        } else if genre == "Любимое" {
-//            if let user = Auth.auth().currentUser {
-//                let snapshot = try? await Database.database(url: .databaseURL).reference().child("users").child(user.uid).child("likedPlaylists").getData()
-//                
-//                guard let snapshot = snapshot, let likedPlaylists = snapshot.value as? [String: Bool] else { return }
-//                
-//                let likedObjects = self.allCourses.filter { story in
-//                    return story.type == .meditation && likedPlaylists.keys.contains(story.name)
-//                }
-//                self.filteredStories = likedObjects
-//            }
-//        } else {
-//            self.filteredStories = self.allCourses.filter { $0.genre == genre }
-//        }
-//    }
+    //    @MainActor
+    //    func filterResults(by genre: String) async {
+    //        if genre == "Всё" {
+    //            await getCourses(isDaily: false)
+    //        } else if genre == "Любимое" {
+    //            if let user = Auth.auth().currentUser {
+    //                let snapshot = try? await Database.database(url: .databaseURL).reference().child("users").child(user.uid).child("likedPlaylists").getData()
+    //
+    //                guard let snapshot = snapshot, let likedPlaylists = snapshot.value as? [String: Bool] else { return }
+    //
+    //                let likedObjects = self.allCourses.filter { story in
+    //                    return story.type == .meditation && likedPlaylists.keys.contains(story.name)
+    //                }
+    //                self.filteredStories = likedObjects
+    //            }
+    //        } else {
+    //            self.filteredStories = self.allCourses.filter { $0.genre == genre }
+    //        }
+    //    }
     
     
     func getCoursesUserLiked() async {
         let snapshot = try? await Database.database(url: .databaseURL).reference().child("users").child(Auth.auth().currentUser?.uid ?? yandexViewModel.yandexUserID).child("likedPlaylists").getData()
+        
         guard let snapshot = snapshot, let likedPlaylists = snapshot.value as? [String: Bool] else { return }
         
         await getCoursesNew(isDaily: false, path: .allCourses)
@@ -187,21 +167,13 @@ final class CoursesViewModel: ObservableObject {
             let likedMusic = self.playlists.filter { likedPlaylists.keys.contains($0.name) }
             let likedStories = self.nightStories.filter { likedPlaylists.keys.contains($0.name) }
             
+            
             self.userLikedMaterials = likedMeditations
             self.userLikedMaterials += likedEmergency
             self.userLikedMaterials += likedMusic
             self.userLikedMaterials += likedStories
         }
     }
-    
-    func pause() {
-        playerViewModel.pause()
-    }
-    
-    func isPlaying(urlString: String) -> Bool {
-        return playerViewModel.isPlaying(urlString: urlString)
-    }
-
 }
 
 

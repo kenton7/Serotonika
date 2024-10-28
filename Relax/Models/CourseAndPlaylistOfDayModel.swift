@@ -28,13 +28,18 @@ struct CourseAndPlaylistOfDayModel: Identifiable, Codable, Equatable {
     var genre: String?
     var isLiked: Bool?
     var isSelected: Bool?
-    //var lessons: [Lesson]
+    var isNew: Bool?
+    var lessons: [String: Lesson]?
 }
 
 struct ButtonColor: Codable, Equatable {
     var red: Int
     var green: Int
     var blue: Int
+}
+
+struct Lessons: Codable, Equatable {
+    var lesson: [Lesson]
 }
 
 struct Lesson: Codable, Equatable {

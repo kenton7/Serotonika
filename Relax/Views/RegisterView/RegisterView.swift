@@ -30,7 +30,6 @@ struct RegisterView: View {
     @State private var isTermsAndConditionsPressed = false
     @StateObject private var yandexAuth = YandexAuthorization.shared
     @StateObject private var databaseVM = ChangeDataInDatabase.shared
-    //@EnvironmentObject private var signInWithAppleVM: SignInWithAppleVM
     private let locale = Locale.current
     @Environment(\.colorScheme) private var scheme
     @AppStorage("toogleDarkMode") private var toogleDarkMode = false
@@ -47,7 +46,9 @@ struct RegisterView: View {
                 VStack {
                     Spacer()
                     Text("Создайте новый аккаунт")
-                        .font(.system(.title, design: .rounded, weight: .bold))
+                        .padding(.horizontal, 10)
+                        .minimumScaleFactor(0.5)
+                        .font(.system(size: 25, weight: .bold, design: .rounded))
                     Spacer()
                     //MARK: - Кнопки авторизации через Yandex и VK
                     Button {
@@ -59,7 +60,7 @@ struct RegisterView: View {
                                 }
                                 try YandexLoginSDK.shared.authorize(with: rootViewController,
                                                                     customValues: nil,
-                                                                    authorizationStrategy: .default)
+                                                                    authorizationStrategy: .webOnly)
                             } catch {
                                 print("Ошибка запуска авторизации: \(error.localizedDescription)")
                                 isRegistration = false
@@ -75,7 +76,7 @@ struct RegisterView: View {
                                     .frame(width: 25, height: 25)
                                 Text("Войти с Яндекс ID")
                                     .foregroundStyle(activeDarkModel ? .black : .white)
-                                    .bold()
+                                    .font(.system(size: 20, weight: .bold, design: .rounded))
                             }
                         }
                     }
@@ -128,7 +129,7 @@ struct RegisterView: View {
                                 HStack {
                                     Image(systemName: "applelogo")
                                     Text("Вход с Apple")
-                                        .bold()
+                                        .font(.system(size: 20, weight: .bold, design: .rounded))
                                 }
                                 .foregroundStyle(scheme == .dark ? .black : .white)
                             }
@@ -155,6 +156,7 @@ struct RegisterView: View {
                         .padding()
                         .autocorrectionDisabled(true)
                         .padding(.horizontal)
+                        .font(.system(size: 17, weight: .light, design: .rounded))
                     
                     VStack {
                         EmailFieldView("Email", email: $email)
@@ -217,6 +219,7 @@ struct RegisterView: View {
                                     .frame(width: 20, height: 20)
                                     .overlay {
                                         Image(systemName: "checkmark")
+                                            .font(.system(size: 20))
                                             .foregroundStyle(isAgreeWithPrivacy ? .green : .clear)
                                     }
                             })
@@ -250,6 +253,7 @@ struct RegisterView: View {
                             HStack {
                                 Text("Зарегистрироваться")
                                     .foregroundStyle(.white)
+                                    .font(.system(size: 17, weight: .bold, design: .rounded))
                                     .frame(maxWidth: .infinity)
                             }
                             .contentShape(.rect)

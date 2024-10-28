@@ -1,4 +1,14 @@
 {
+  "appPolicies" : {
+    "eula" : "",
+    "policies" : [
+      {
+        "locale" : "en_US",
+        "policyText" : "",
+        "policyURL" : ""
+      }
+    ]
+  },
   "identifier" : "EEFA9E01",
   "nonRenewingSubscriptions" : [
 
@@ -8,9 +18,10 @@
   ],
   "settings" : {
     "_applicationInternalID" : "6636530807",
+    "_askToBuyEnabled" : true,
     "_developerTeamID" : "44S95Z526W",
     "_failTransactionsEnabled" : false,
-    "_lastSynchronizedDate" : 746474702.18941402,
+    "_lastSynchronizedDate" : 750241389.11128902,
     "_locale" : "en_US",
     "_storefront" : "USA",
     "_storeKitErrors" : [
@@ -62,68 +73,10 @@
     ]
   },
   "subscriptionGroups" : [
-    {
-      "id" : "21529348",
-      "localizations" : [
 
-      ],
-      "name" : "Подписки",
-      "subscriptions" : [
-        {
-          "adHocOffers" : [
-
-          ],
-          "codeOffers" : [
-
-          ],
-          "displayPrice" : "2.99",
-          "familyShareable" : false,
-          "groupNumber" : 1,
-          "internalID" : "6664064006",
-          "introductoryOffer" : null,
-          "localizations" : [
-            {
-              "description" : "Оформите подписку на месяц",
-              "displayName" : "Ежемесячная подписка",
-              "locale" : "ru"
-            }
-          ],
-          "productID" : "monthly.subscription.serotonika.com",
-          "recurringSubscriptionPeriod" : "P1M",
-          "referenceName" : "Ежемесячная подписка",
-          "subscriptionGroupID" : "21529348",
-          "type" : "RecurringSubscription"
-        },
-        {
-          "adHocOffers" : [
-
-          ],
-          "codeOffers" : [
-
-          ],
-          "displayPrice" : "24.99",
-          "familyShareable" : false,
-          "groupNumber" : 2,
-          "internalID" : "6664064117",
-          "introductoryOffer" : null,
-          "localizations" : [
-            {
-              "description" : "Оформите подписку на год",
-              "displayName" : "Подписка на год",
-              "locale" : "ru"
-            }
-          ],
-          "productID" : "yearly.subscription.serotonika.com",
-          "recurringSubscriptionPeriod" : "P1Y",
-          "referenceName" : "Подписка на год",
-          "subscriptionGroupID" : "21529348",
-          "type" : "RecurringSubscription"
-        }
-      ]
-    }
   ],
   "version" : {
-    "major" : 3,
+    "major" : 4,
     "minor" : 0
   }
 }

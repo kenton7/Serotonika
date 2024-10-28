@@ -42,7 +42,7 @@ struct LogInView: View {
                 VStack {
                     Spacer()
                     Text("C возвращением!")
-                        .font(.system(.title, design: .rounded, weight: .bold))
+                        .font(.system(size: 25, weight: .bold, design: .rounded))
                     
                     Button {
                         if let rootViewController = getRootViewController() {
@@ -50,7 +50,7 @@ struct LogInView: View {
                                 self.isLogining = true
                             }
                             do {
-                                try YandexLoginSDK.shared.authorize(with: rootViewController, authorizationStrategy: .default)
+                                try YandexLoginSDK.shared.authorize(with: rootViewController, authorizationStrategy: .webOnly)
                             } catch {
                                 print("Ошибка запуска авторизации через Яндекс: \(error.localizedDescription)")
                                 DispatchQueue.main.async {
@@ -68,7 +68,7 @@ struct LogInView: View {
                                     .frame(width: 25, height: 25)
                                 Text("Войти с Яндекс ID")
                                     .foregroundStyle(activeDarkModel ? .black : .white)
-                                    .bold()
+                                    .font(.system(size: 20, weight: .bold, design: .rounded))
                             }
                         }
                     }
@@ -104,7 +104,7 @@ struct LogInView: View {
                                 HStack {
                                     Image(systemName: "applelogo")
                                     Text("Вход с Apple")
-                                        .bold()
+                                        .font(.system(size: 20, weight: .bold, design: .rounded))
                                 }
                                 .foregroundStyle(scheme == .dark ? .black : .white)
                             }
@@ -174,6 +174,7 @@ struct LogInView: View {
                             HStack {
                                 Text("Войти")
                                     .foregroundStyle(.white)
+                                    .font(.system(size: 17, weight: .bold, design: .rounded))
                                     .frame(maxWidth: .infinity)
                             }
                             .contentShape(Rectangle())
@@ -195,7 +196,8 @@ struct LogInView: View {
                             isForgotPasswordPressed = true
                         }
                     }, label: {
-                        Text("Забыли пароль?").bold()
+                        Text("Забыли пароль?")
+                            .font(.system(size: 17, weight: .bold, design: .rounded))
                             .foregroundStyle(activeDarkModel ? .white : Color(uiColor: .darkGray))
                     })
                     .padding()

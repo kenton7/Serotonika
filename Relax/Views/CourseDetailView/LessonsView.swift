@@ -39,18 +39,20 @@ struct LessonsView: View {
                     HStack(spacing: 20) {
                         Button(action: {
                             if premiumViewModel.hasUnlockedPremuim || file.trackIndex! == 0 {
+                                let impactMed = UIImpactFeedbackGenerator(style: .soft)
+                                impactMed.impactOccurred()
                                 isPressedWithoutPremium = false
                                 url = isFemale ? file.audioFemaleURL : file.audioMaleURL
                                 self.lesson = file
                                 //self.config.selectedContentItem = file
                                 self.config2.selectedContentItem = file
-                                withAnimation(.easeInOut(duration: 0.3)) {
-                                    config2.showMiniPlayer = true
-                                }
-                                if viewModel.isPlaying(urlString: url) {
-                                    viewModel.pause()
+                                databaseViewModel.updateListeners(course: course, type: course.type)
+                                //                                withAnimation(.easeInOut(duration: 0.3)) {
+                                //                                    config2.showMiniPlayer = true
+                                //                                }
+                                if playerVM.isPlaying(urlString: url) {
+                                    playerVM.pause()
                                 } else {
-                                    //databaseViewModel.updateListeners(course: course, type: course.type)
                                     playerVM.playAudio(from: url,
                                                        playlist: lessons,
                                                        trackIndex: file.trackIndex,
@@ -75,7 +77,7 @@ struct LessonsView: View {
                                                                           green: CGFloat(course.color.green) / 255,
                                                                           blue: CGFloat(course.color.blue) / 255,
                                                                           alpha: 1)))
-                                Image(systemName: viewModel.isPlaying(urlString: isFemale ? file.audioFemaleURL : file.audioMaleURL) ? "pause.fill" : "play.fill")
+                                Image(systemName: playerVM.isPlaying(urlString: isFemale ? file.audioFemaleURL : file.audioMaleURL) ? "pause.fill" : "play.fill")
                                     .foregroundStyle(.white)
                                     .font(.system(size: 15, design: .rounded)).bold()
                             }
@@ -86,6 +88,8 @@ struct LessonsView: View {
                             if premiumViewModel.hasUnlockedPremuim || file.trackIndex! == 0 {
                                 isTappedOnName = true
                                 isPressedWithoutPremium = false
+                                let impactMed = UIImpactFeedbackGenerator(style: .soft)
+                                impactMed.impactOccurred()
                                 url = isFemale ? file.audioFemaleURL : file.audioMaleURL
                                 if !url.isEmpty {
                                     playerVM.playAudio(from: url,
@@ -94,7 +98,7 @@ struct LessonsView: View {
                                                        type: course.type,
                                                        isFemale: isFemale,
                                                        course: course)
-                                    //databaseViewModel.updateListeners(course: course, type: course.type)
+                                    databaseViewModel.updateListeners(course: course, type: course.type)
                                     self.lesson = file
                                     self.config2.selectedContentItem = file
                                     withAnimation(.easeInOut(duration: 0.3)) {
@@ -116,15 +120,17 @@ struct LessonsView: View {
                             HStack {
                                 VStack {
                                     HStack {
-                                        Text(file.name).bold()
+                                        Text(file.name)
                                             .padding(.vertical, 2)
                                             .foregroundStyle(course.type == .story || activeDarkModel ? .white : .black)
+                                            .font(.system(size: 17, weight: .bold, design: .rounded))
                                             .multilineTextAlignment(.leading)
                                         Spacer()
                                     }
                                     HStack {
                                         Text("\(file.duration) мин.")
                                             .foregroundStyle(Color(uiColor: .secondaryTextColor))
+                                            .font(.system(size: 15, weight: .bold, design: .rounded))
                                             .multilineTextAlignment(.leading)
                                         Spacer()
                                     }
@@ -148,12 +154,12 @@ struct LessonsView: View {
                     Divider()
                 }
                 
-//                GeometryReader {
-//                    let size = $0.size
-//                    if config.showMiniPlayer {
-//                        MiniPlayerView(size: size, config: $config)
-//                    }
-//                }
+                //                GeometryReader {
+                //                    let size = $0.size
+                //                    if config.showMiniPlayer {
+                //                        MiniPlayerView(size: size, config: $config)
+                //                    }
+                //                }
             }
         }
         .sheet(isPresented: $isPressedWithoutPremium, content: {

@@ -39,8 +39,9 @@ final class ChangeDataInDatabase: ObservableObject, DatabaseChangable {
     @Published var storyURL = ""
     @Published var isTutorialViewed: Bool = false
     private var authViewModel = AuthViewModel()
-    
+    @Published var isUpdatedListenets = false
     static let shared = ChangeDataInDatabase()
+    var lastListenedCourseID: String?
     
     private init() {}
     
@@ -85,6 +86,11 @@ final class ChangeDataInDatabase: ObservableObject, DatabaseChangable {
     }
     
     func updateListeners(course: CourseAndPlaylistOfDayModel, type: Types) {
+        // Проверяем, отличается ли выбранный курс от последнего прослушанного
+        guard course.id != lastListenedCourseID else {
+            print("Курс уже прослушивается, обновления не требуется.")
+            return
+        }
         
         var reference: DatabaseReference
         self.listeners += 1
@@ -101,20 +107,25 @@ final class ChangeDataInDatabase: ObservableObject, DatabaseChangable {
         }
         
         // Загружаем текущее значение
-        reference.child("listenedCount").observeSingleEvent(of: .value) { snapshot in
+        reference.child("listenedCount").observeSingleEvent(of: .value) { [weak self] snapshot in
+            guard let self else { return }
             var currentListeners = snapshot.value as? Int ?? 0
             currentListeners += 1
             
             // Сохраняем увеличенное значение обратно в базу данных
-            reference.updateChildValues(["listenedCount": currentListeners]) { error, _ in
-                if let error = error {
-                    print("Ошибка при обновлении listenedCount: \(error)")
-                } else {
-                    DispatchQueue.main.async {
-                        self.listeners = currentListeners
-                        print("Обновляем прослушивания. Стало: \(self.listeners)")
+                reference.updateChildValues(["listenedCount": currentListeners]) { error, _ in
+                    if let error = error {
+                        print("Ошибка при обновлении listenedCount: \(error)")
+                    } else {
+                        DispatchQueue.main.async {
+                            self.listeners = currentListeners
+                            print("Обновляем прослушивания. Стало: \(self.listeners)")
+                            self.isUpdatedListenets = true
+                            
+                            // Обновляем идентификатор последнего прослушанного курса
+                            self.lastListenedCourseID = course.id
+                        }
                     }
-                }
             }
         }
     }
@@ -140,7 +151,7 @@ final class ChangeDataInDatabase: ObservableObject, DatabaseChangable {
                     self.listeners = listenersCount
                 }
             } else {
-                print("Значнние не найдено для \(course.id) в \(path)")
+                print("Значнние listenedCount не найдено для \(course.id) в \(path)")
             }
         }
     }
@@ -164,9 +175,10 @@ final class ChangeDataInDatabase: ObservableObject, DatabaseChangable {
             if let likesCount = snapshot.value as? Int {
                 DispatchQueue.main.async {
                     self.likes = likesCount
+                    print("Лайков у \(course.name) \(likesCount)")
                 }
             } else {
-                print("Значнние не найдено для \(course.id) в \(path)")
+                print("Значнние likes не найдено для \(course.id) в \(path)")
             }
         }
     }

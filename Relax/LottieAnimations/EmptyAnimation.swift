@@ -12,7 +12,6 @@ import UIKit
 
 struct EmptyAnimation: UIViewRepresentable {
     
-    @AppStorage("toogleDarkMode") private var toogleDarkMode = false
     @AppStorage("activeDarkModel") private var activeDarkModel = false
     
     init() {

@@ -50,7 +50,7 @@ struct RemindersScreen: View {
                         Text("В какое время вам удобнее было бы медитировать?")
                             .padding(.horizontal)
                             .foregroundStyle(activeDarkModel ? .white : Color(uiColor: .init(red: 63/255, green: 65/255, blue: 78/255, alpha: 1)))
-                            .font(.system(.title2, design: .rounded, weight: .bold))
+                            .font(.system(size: 20, weight: .bold, design: .rounded))
                             .multilineTextAlignment(.leading)
                         Spacer()
                     }
@@ -60,6 +60,7 @@ struct RemindersScreen: View {
                             .padding(.horizontal)
                             .padding(.vertical, 5)
                             .foregroundStyle(activeDarkModel ? .white : Color(uiColor: .init(red: 161/255, green: 164/255, blue: 178/255, alpha: 1)))
+                            .font(.system(size: 15, weight: .light, design: .rounded))
                         Spacer()
                     }
                     
@@ -73,7 +74,7 @@ struct RemindersScreen: View {
                             .padding(.horizontal)
                             .padding(.vertical, 5)
                             .foregroundStyle(activeDarkModel ? .white : Color(uiColor: .init(red: 63/255, green: 65/255, blue: 78/255, alpha: 1)))
-                            .font(.system(.title2, design: .rounded, weight: .bold))
+                            .font(.system(size: 20, weight: .bold, design: .rounded))
                             .multilineTextAlignment(.leading)
                         Spacer()
                     }
@@ -82,6 +83,7 @@ struct RemindersScreen: View {
                         Text("Каждый день – это лучший вариант, \nно мы советуем выбрать как минимум \n5 дней в неделю.")
                             .padding(.horizontal)
                             .foregroundStyle(activeDarkModel ? .white : Color(uiColor: .init(red: 161/255, green: 164/255, blue: 178/255, alpha: 1)))
+                            .font(.system(size: 15, weight: .light, design: .rounded))
                         Spacer()
                     }
                     
@@ -101,6 +103,7 @@ struct RemindersScreen: View {
                                 Text(day.name)
                                     .foregroundColor(day.isSelected ? .white : Color(uiColor: .init(red: 161/255, green: 164/255, blue: 178/255, alpha: 1)))
                                     .frame(width: 40, height: 40)
+                                    .font(.system(size: 15, weight: .light, design: .rounded))
                                     .background(day.isSelected ? Color(uiColor: .init(red: 63/255, green: 65/255, blue: 78/255, alpha: 1)) : Color.clear)
                                     .overlay(
                                         Circle()
@@ -111,7 +114,6 @@ struct RemindersScreen: View {
                             .padding(.horizontal, 3)
                         }
                     })
-                    .padding(.vertical, 10)
                     
                     VStack {
                         Spacer()
@@ -139,6 +141,7 @@ struct RemindersScreen: View {
                             HStack {
                                 Text("Сохранить")
                                     .foregroundStyle(.white)
+                                    .font(.system(size: 20, weight: .bold, design: .rounded))
                                     .frame(maxWidth: .infinity)
                             }
                             .contentShape(.rect)
@@ -162,6 +165,7 @@ struct RemindersScreen: View {
                             }, label: {
                                 Text("Нет, спасибо")
                                     .foregroundStyle(activeDarkModel ? .white : Color(uiColor: .noThanksButtonColor))
+                                    .font(.system(size: 20, weight: .bold, design: .rounded))
                             })
                         }
                     }

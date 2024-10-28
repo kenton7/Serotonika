@@ -9,10 +9,13 @@ import SwiftUI
 import FirebaseDatabase
 import AVFoundation
 import FirebaseAuth
+import StoreKit
+import _AVKit_SwiftUI
 
 struct PlayerScreen: View {
     
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.requestReview) var requestReview
     @State private var sliderValue: Double = 0.0
     @ObservedObject private var fetchDatabaseVM = CoursesViewModel()
     @StateObject private var databaseVM = ChangeDataInDatabase.shared
@@ -30,30 +33,46 @@ struct PlayerScreen: View {
     @AppStorage("toogleDarkMode") private var toogleDarkMode = false
     @AppStorage("activeDarkModel") private var activeDarkModel = false
     
+    
     let lesson: Lesson?
     let isFemale: Bool
     let course: CourseAndPlaylistOfDayModel
-    let url: String
+    @State var url: String
+    //var videoPlayer: AVPlayer
+    
+    private let videoURL = URL(fileURLWithPath: Bundle.main.path(forResource: "PlayerVideo1", ofType: "mp4")!)
     
     var body: some View {
         ZStack {
-            if course.type == .story {
-                Color(uiColor: .init(red: 3/255, green: 23/255, blue: 76/255, alpha: 1)).ignoresSafeArea()
-            } else {
-                if activeDarkModel {
-                    Color.black
-                        .ignoresSafeArea()
-                } else {
-                    Color(uiColor: .init(red: 250/255,
-                                         green: 247/255,
-                                         blue: 242/255,
-                                         alpha: 1))
+            // Видео на заднем плане
+            Group {
+                AVPlayerControllerRepresented()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .ignoresSafeArea()
-                }
+                    .scaleEffect(x: 1.5, y: 1.5)
             }
+//            if course.type == .story {
+//                Color(uiColor: .init(red: 3/255, green: 23/255, blue: 76/255, alpha: 1)).ignoresSafeArea()
+//            } else {
+//                if activeDarkModel {
+//                    Color(uiColor: .init(red: 41/255,
+//                                         green: 42/255,
+//                                         blue: 47/255,
+//                                         alpha: 1))
+//                        .ignoresSafeArea()
+//                } else {
+//                    Color(uiColor: .init(red: 250/255,
+//                                         green: 247/255,
+//                                         blue: 242/255,
+//                                         alpha: 1))
+//                    .ignoresSafeArea()
+//                }
+//            }
             VStack {
                 HStack {
                     Button(action: {
+                        let impactMed = UIImpactFeedbackGenerator(style: .soft)
+                        impactMed.impactOccurred()
                         dismiss()
                     }, label: {
                         Image("CloseButton")
@@ -70,7 +89,7 @@ struct PlayerScreen: View {
                                         isPressedDownloadWithoutPremium = false
                                         Task.detached {
                                             do {
-                                                let _ = try await downloadManager.asyncDownload(course: course,
+                                                let _ = try await downloadManager.downloadLesson(course: course,
                                                                                            courseType: course.type,
                                                                                            isFemale: isFemale,
                                                                                            lesson: lesson)
@@ -125,10 +144,10 @@ struct PlayerScreen: View {
                     Spacer()
                     Text((playerViewModel.lessonName == "" ? lesson?.name : playerViewModel.lessonName) ?? "")
                         .foregroundStyle(course.type == .story || activeDarkModel ? .white : .black)
-                        .font(.system(.title, design: .rounded, weight: .bold))
+                        .font(.system(size: 25, weight: .bold, design: .rounded))
                         .multilineTextAlignment(.center)
                     Text(course.name)
-                        .font(.system(.title3, design: .rounded, weight: .light))
+                        .font(.system(size: 17, weight: .light, design: .rounded))
                         .foregroundStyle(Color(uiColor: .init(red: 160/255,
                                                               green: 163/255,
                                                               blue: 177/255,
@@ -152,19 +171,21 @@ struct PlayerScreen: View {
                         })
                         
                         Button(action: {
-                            if let lesson {
-                                let url = isFemale ? lesson.audioFemaleURL : lesson.audioMaleURL
+                            let impactMed = UIImpactFeedbackGenerator(style: .soft)
+                            impactMed.impactOccurred()
+                            if lesson != nil {
+                                //let url = isFemale ? lesson.audioFemaleURL : lesson.audioMaleURL
                                 Task {
-                                    let lessons = await fetchDatabaseVM.fetchCourseDetails(type: course.type, 
+                                    let lessons = await fetchDatabaseVM.fetchCourseDetails(type: course.type,
                                                                                            courseID: course.id)
                                     DispatchQueue.main.async {
                                         fetchDatabaseVM.lessons = lessons
-                                        if playerViewModel.isAudioPlaying() {
+                                        if playerViewModel.isPlaying(urlString: playerViewModel.currentPlayingURL ?? "") {
                                             playerViewModel.pause()
                                         } else {
-                                            playerViewModel.playAudio(from: url,
+                                            playerViewModel.playAudio(from: playerViewModel.currentPlayingURL ?? "",
                                                                       playlist: fetchDatabaseVM.lessons,
-                                                                      trackIndex: lesson.trackIndex,
+                                                                      trackIndex: playerViewModel.currentTrackIndex,
                                                                       type: course.type,
                                                                       isFemale: isFemale,
                                                                       course: course)
@@ -175,8 +196,12 @@ struct PlayerScreen: View {
                                 if playerViewModel.isAudioPlaying() {
                                     playerViewModel.pause()
                                 } else {
-                                    guard let url = URL(string: self.url) else { return }
-                                    playerViewModel.playLocalAudioFrom(url: url, lessonName: playerViewModel.lessonName)
+                                    //guard let url = URL(string: self.url) else { return }
+                                    guard let url = playerViewModel.currentPlayingURL, let path = URL(string: url) else {
+                                        print("error")
+                                        return
+                                    }
+                                    playerViewModel.playLocalAudioFrom(url: path, lessonName: playerViewModel.lessonName)
                                 }
                             }
                         }, label: {
@@ -211,14 +236,13 @@ struct PlayerScreen: View {
                     }
                     .padding()
                     
-                    
                     ZStack {
-                        
                         if playerViewModel.totalTime > 0 {
                             // Фоновый слой для отображения прогресса буферизации
-                            ProgressView(value: playerViewModel.bufferedTime, total: playerViewModel.totalTime)
-                                .progressViewStyle(LinearProgressViewStyle(tint: .gray.opacity(0.6))) // Стиль для отображения серого прогресса буферизации
-                                            .padding(.horizontal)
+                            let clampedBufferedTime = max(0, min(playerViewModel.bufferedTime, playerViewModel.totalTime))
+                                ProgressView(value: clampedBufferedTime, total: playerViewModel.totalTime)
+                                    .progressViewStyle(LinearProgressViewStyle(tint: .gray.opacity(0.6)))
+                                    .padding(.horizontal)
                             
                             Slider(value: Binding(get: {
                                 self.sliderValue
@@ -234,13 +258,6 @@ struct PlayerScreen: View {
                                 if playerViewModel.duration.seconds.isFinite && playerViewModel.duration.seconds > 0 {
                                     self.sliderValue = newValue.seconds / playerViewModel.duration.seconds
                                 }
-                                
-//                                if isListenersUpdated == false || isListenersUpdated == nil {
-//                                    if sliderValue >= 0.5 {
-//                                        databaseVM.updateListeners(course: course, type: course.type)
-//                                        isListenersUpdated = true
-//                                    }
-//                                }
                             }
                         } else {
                             LoadingAnimationButton()
@@ -251,12 +268,14 @@ struct PlayerScreen: View {
                     HStack {
                         Text(playerViewModel.formatTime(time: playerViewModel.currentTime))
                             .foregroundStyle(course.type == .story || activeDarkModel ? .white : .black)
+                            .font(.system(size: 13, weight: .light, design: .rounded))
                         Spacer()
                         if playerViewModel.duration != .zero {
                             Text(playerViewModel.formatTime(time: playerViewModel.duration))
                                 .foregroundStyle(course.type == .story || activeDarkModel ? .white : .black)
+                                .font(.system(size: 13, weight: .light, design: .rounded))
                         } else {
-                            LoadingAnimationButton()
+                           LoadingAnimationButton()
                         }
                     }
                     .padding(.horizontal)
@@ -266,9 +285,12 @@ struct PlayerScreen: View {
             }
         }
         .onAppear {
-            if let _ = currentUser?.uid, !yandexViewModel.yandexUserID.isEmpty, let lesson = lesson {
+            if /*let _ = currentUser?.uid, !yandexViewModel.yandexUserID.isEmpty,*/ let lesson = lesson {
                 isDownloaded = fileManagerService.isDownloaded(lesson: lesson, course: course)
+                print("isDownloaded: \(isDownloaded)")
             }
+            requestReview()
+
         }
         .sheet(isPresented: $isPressedDownloadWithoutPremium, content: {
             PremiumScreen()
@@ -278,4 +300,9 @@ struct PlayerScreen: View {
         })
     }
 }
+
+//#Preview {
+//    PlayerScreen(lesson: Lesson(audioMaleURL: "https://firebasestorage.googleapis.com/v0/b/relax-8e1d3.appspot.com/o/meditations%2Frelationships%2Ffemale%2Frelationships5Female.mp3?alt=media&token=4d6dbb41-2ffb-4f70-9fbb-adb2fdc4c095", audioFemaleURL: "https://firebasestorage.googleapis.com/v0/b/relax-8e1d3.appspot.com/o/meditations%2Frelationships%2Ffemale%2Frelationships5Female.mp3?alt=media&token=4d6dbb41-2ffb-4f70-9fbb-adb2fdc4c095", name: "Доверие как основа крепких отношений", duration: "8", lessonID: "relationship5", trackIndex: 4), isFemale: true, course: .init(id: "Relationships", name: "Искусство гармоничных отношений", imageURL: "https://firebasestorage.googleapis.com/v0/b/relax-8e1d3.appspot.com/o/meditations%2Frelationships%2F8388073.jpg?alt=media&token=08c24df0-e129-4b36-95fd-3275bc0cb357", color: .init(red: 128/255, green: 129/255, blue: 282/255), duration: "8", description: "", listenedCount: 8, type: .meditation, isDaily: false, likes: 9), url: "")
+//        .environmentObject(DownloadManager())
+//}
 

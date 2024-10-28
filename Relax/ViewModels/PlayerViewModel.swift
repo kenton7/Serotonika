@@ -9,6 +9,7 @@ import Foundation
 import AVFoundation
 import Combine
 import MediaPlayer
+import AVKit
 
 final class PlayerViewModel: ObservableObject {
     
@@ -32,6 +33,7 @@ final class PlayerViewModel: ObservableObject {
     @Published var isPremium = false
     @Published var totalTime: Double = 1
     @Published var bufferedTime: Double = 0
+    @Published var path = Bundle.main.url(forResource: "PlayerVideo1", withExtension: "mp4")
     private let contentItem = MPContentItem()
     private let databaseVM = ChangeDataInDatabase.shared
     
@@ -98,13 +100,21 @@ final class PlayerViewModel: ObservableObject {
             currentTrackIndex += 1
             if currentTrackIndex < self.playlist.count {
                 let nextAudioURL = isFemale ? playlist[currentTrackIndex].audioFemaleURL : playlist[currentTrackIndex].audioMaleURL
-                self.playAudio(from: nextAudioURL, playlist: playlist, trackIndex: currentTrackIndex, type: .playlist, isFemale: isFemale, course: course!)
+                DispatchQueue.main.async { [weak self] in
+                    if let self {
+                        self.playAudio(from: nextAudioURL, playlist: playlist, trackIndex: currentTrackIndex, type: .playlist, isFemale: isFemale, course: course!)
+                    }
+                }
                 currentPlayingURL = nextAudioURL
                 return .success
             } else {
                 currentTrackIndex = 0
                 let nextAudioURL = isFemale ? playlist[currentTrackIndex].audioFemaleURL : playlist[currentTrackIndex].audioMaleURL
-                self.playAudio(from: nextAudioURL, playlist: playlist, trackIndex: currentTrackIndex, type: .playlist, isFemale: isFemale, course: course!)
+                DispatchQueue.main.async { [weak self] in
+                    if let self {
+                        self.playAudio(from: nextAudioURL, playlist: playlist, trackIndex: currentTrackIndex, type: .playlist, isFemale: isFemale, course: course!)
+                    }
+                }
                 currentPlayingURL = nextAudioURL
                 return .success
             }
@@ -129,13 +139,21 @@ final class PlayerViewModel: ObservableObject {
             
             if currentTrackIndex < self.playlist.count {
                 let nextAudioURL = isFemale ? playlist[currentTrackIndex].audioFemaleURL : playlist[currentTrackIndex].audioMaleURL
-                self.playAudio(from: nextAudioURL, playlist: playlist, trackIndex: currentTrackIndex, type: .playlist, isFemale: isFemale, course: course!)
+                DispatchQueue.main.async { [weak self] in
+                    if let self {
+                        self.playAudio(from: nextAudioURL, playlist: playlist, trackIndex: currentTrackIndex, type: .playlist, isFemale: isFemale, course: course!)
+                    }
+                }
                 currentPlayingURL = nextAudioURL
                 return .success
             } else {
                 currentTrackIndex = 0
                 let nextAudioURL = isFemale ? playlist[currentTrackIndex].audioFemaleURL : playlist[currentTrackIndex].audioMaleURL
-                self.playAudio(from: nextAudioURL, playlist: playlist, trackIndex: currentTrackIndex, type: .playlist, isFemale: isFemale, course: course!)
+                DispatchQueue.main.async { [weak self] in
+                    if let self {
+                        self.playAudio(from: nextAudioURL, playlist: playlist, trackIndex: currentTrackIndex, type: .playlist, isFemale: isFemale, course: course!)
+                    }
+                }
                 currentPlayingURL = nextAudioURL
                 return .success
             }
@@ -147,7 +165,7 @@ final class PlayerViewModel: ObservableObject {
             await self.setupNowPlaying()
         }
     }
-
+    
     
     func setupNowPlaying() async {
         guard let player = player, let playerItem = player.currentItem else { return }
@@ -198,39 +216,29 @@ final class PlayerViewModel: ObservableObject {
         var nowPlayingInfo = MPNowPlayingInfoCenter.default().nowPlayingInfo ?? [String: Any]()
         nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = CMTimeGetSeconds(player.currentTime()) as NSNumber
         nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = player.rate as NSNumber
-            
-            MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
     }
-    
-    //    func autoPlayingNextTrack(playlist: [Lesson], trackIndex: Int) {
-    //        currentTrackIndex += 1
-    //        if currentTrackIndex < playlist.count {
-    //            let nextAudioURL = isFemale ? playlist[currentTrackIndex].audioFemaleURL : playlist[currentTrackIndex].audioMaleURL
-    //            playAudio(from: nextAudioURL, playlist: playlist, trackIndex: currentTrackIndex, type: .playlist, isFemale: isFemale, course: course!)
-    //        } else {
-    //            currentTrackIndex = 0
-    //            currentPlayingURL = nil
-    //        }
-    //    }
     
     func autoPlayingNextTrack(playlist: [Lesson], trackIndex: Int) {
         currentTrackIndex += 1
         
         Task {
             guard await PremiumViewModel.shared.hasUnlockedPremuim else {
-                currentTrackIndex = 0
-                currentPlayingURL = nil
-                isPremium = false
-                print("Am I premium? \(await PremiumViewModel.shared.hasUnlockedPremuim)")
+                DispatchQueue.main.async {
+                    self.currentTrackIndex = 0
+                    self.currentPlayingURL = nil
+                    self.isPremium = false
+                }
                 return
             }
-            isPremium = await PremiumViewModel.shared.hasUnlockedPremuim
             if currentTrackIndex < playlist.count {
                 let nextAudioURL = isFemale ? playlist[currentTrackIndex].audioFemaleURL : playlist[currentTrackIndex].audioMaleURL
-                playAudio(from: nextAudioURL, playlist: playlist, trackIndex: currentTrackIndex, type: .playlist, isFemale: isFemale, course: course!)
+                await playAudio(from: nextAudioURL, playlist: playlist, trackIndex: currentTrackIndex, type: .playlist, isFemale: isFemale, course: course!)
             } else {
-                currentTrackIndex = 0
-                currentPlayingURL = nil
+                DispatchQueue.main.async {
+                    self.currentTrackIndex = 0
+                    self.currentPlayingURL = nil
+                }
             }
         }
     }
@@ -249,33 +257,6 @@ final class PlayerViewModel: ObservableObject {
             return false
         }
     }
-    
-    //    func autoPlayingNextTrack(playlist: [Lesson], trackIndex: Int) {
-    //        currentTrackIndex += 1
-    //
-    //        Task {
-    //            guard await PremiumViewModel().hasUnlockedPremuim else {
-    //                currentTrackIndex = 0
-    //                currentPlayingURL = nil
-    //                print(await PremiumViewModel().checkPremium())
-    //                return
-    //            }
-    ////            guard await PremiumViewModel().hasUnlockedPremuim else {
-    ////                currentTrackIndex = 0
-    ////                currentPlayingURL = nil
-    ////                return
-    ////            }
-    //
-    //            if currentTrackIndex < playlist.count {
-    //                let nextAudioURL = isFemale ? playlist[currentTrackIndex].audioFemaleURL : playlist[currentTrackIndex].audioMaleURL
-    //                playAudio(from: nextAudioURL, playlist: playlist, trackIndex: currentTrackIndex, type: .playlist, isFemale: isFemale, course: course!)
-    //            } else {
-    //                currentTrackIndex = 0
-    //                currentPlayingURL = nil
-    //            }
-    //        }
-    //    }
-    
     
     func playLocalAudioFrom(url: URL, lessonName: String) {
         guard FileManager.default.fileExists(atPath: url.path) else {
@@ -301,12 +282,12 @@ final class PlayerViewModel: ObservableObject {
         contentItem.title = self.lessonName
     }
     
+    @MainActor
     func playAudio(from urlString: String, playlist: [Lesson], trackIndex: Int?, type: Types, isFemale: Bool, course: CourseAndPlaylistOfDayModel) {
         guard let url = URL(string: urlString) else {
             print("Invalid URL")
             return
         }
-        
         
         self.isFemale = isFemale
         self.playlist = playlist
@@ -323,21 +304,22 @@ final class PlayerViewModel: ObservableObject {
             removeTimeObserver()
             playerItem = AVPlayerItem(url: url)
             player = AVPlayer(playerItem: playerItem)
+            //player = AVPlayer(url: url)
             currentPlayingURL = urlString
             currentTime = .zero
             setupTimeObserver()
             observePlayerItemStatus()
             // Используем Combine для наблюдения за изменениями буферизации
-                    playerItem?.publisher(for: \.loadedTimeRanges)
-                        .sink { [weak self] timeRanges in
-                            if let timeRange = timeRanges.first?.timeRangeValue {
-                                let bufferedTime = CMTimeGetSeconds(timeRange.start) + CMTimeGetSeconds(timeRange.duration)
-                                DispatchQueue.main.async {
-                                    self?.bufferedTime = bufferedTime
-                                }
-                            }
+            playerItem?.publisher(for: \.loadedTimeRanges)
+                .sink { [weak self] timeRanges in
+                    if let timeRange = timeRanges.first?.timeRangeValue {
+                        let bufferedTime = CMTimeGetSeconds(timeRange.start) + CMTimeGetSeconds(timeRange.duration)
+                        DispatchQueue.main.async {
+                            self?.bufferedTime = bufferedTime
                         }
-                        .store(in: &cancellables)
+                    }
+                }
+                .store(in: &cancellables)
             
             // Используем Combine для наблюдения за изменениями длительности
             playerItem?.publisher(for: \.duration)
@@ -389,7 +371,7 @@ final class PlayerViewModel: ObservableObject {
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(playerDidFinishPlaying),
                                                name: .AVPlayerItemDidPlayToEndTime,
-                                               object: nil)
+                                               object: playerItem)
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(handleInterruption),
                                                name: AVAudioSession.interruptionNotification,
@@ -397,6 +379,9 @@ final class PlayerViewModel: ObservableObject {
     }
     
     @objc private func playerDidFinishPlaying(notification: NSNotification) {
+        guard let finishedPlayerItem = notification.object as? AVPlayerItem, finishedPlayerItem == playerItem else {
+            return // Игнорируем уведомление, если оно не связано с текущим playerItem
+        }
         autoPlayingNextTrack(playlist: self.playlist, trackIndex: currentTrackIndex)
     }
     
@@ -429,7 +414,6 @@ final class PlayerViewModel: ObservableObject {
             self?.currentTime = time
             if let duration = self?.playerItem?.duration {
                 self?.duration = duration
-                
             }
         })
     }
@@ -477,6 +461,7 @@ final class PlayerViewModel: ObservableObject {
         observers.append(statusObserver)
     }
     
+    @MainActor
     func seek(by seconds: Double, completion: @escaping (Bool) async -> Void) {
         guard let player = player else { return }
         let currentTime = CMTimeGetSeconds(player.currentTime())

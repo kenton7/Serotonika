@@ -71,7 +71,6 @@ struct CourseDetailView: View {
             databaseViewModel.checkIfUserLiked(userID: user?.uid ?? yandexViewModel.yandexUserID, course: course)
             databaseViewModel.getListenersIn(course: course, courseType: course.type)
             databaseViewModel.storyInfo(course: course, isFemale: isFemale)
-            //isLiked = databaseViewModel.isLiked
         }
         .task {
             lessons = await coursesViewModel.fetchCourseDetails(type: course.type, courseID: course.id)
@@ -91,7 +90,7 @@ struct CourseDetailView: View {
                                                                                            green: 65/255,
                                                                                            blue: 78/255,
                                                                                            alpha: 1)))
-                    .font(.system(.title2, design: .rounded)).bold()
+                    .font(.system(size: 20, weight: .bold, design: .rounded))
                     .multilineTextAlignment(.leading)
                 
                 Spacer()
@@ -101,6 +100,8 @@ struct CourseDetailView: View {
                         Button(action: {
                             withAnimation {
                                 databaseViewModel.isLiked.toggle()
+                                let impactMed = UIImpactFeedbackGenerator(style: .soft)
+                                impactMed.impactOccurred()
                             }
                             if databaseViewModel.isLiked {
                                 databaseViewModel.userLiked(course: course,
@@ -118,6 +119,7 @@ struct CourseDetailView: View {
                         }, label: {
                             Image(systemName: databaseViewModel.isLiked ? "heart.fill" : "heart")
                                 .bold()
+                                .font(.system(size: 25, weight: .bold, design: .rounded))
                                 .foregroundColor(course.type == .story || activeDarkModel ? .white : Color(uiColor: .init(red: 63/255,
                                                                                                        green: 65/255,
                                                                                                        blue: 78/255,
@@ -157,6 +159,7 @@ struct CourseDetailView: View {
                                 Image(systemName: "arrow.down")
                                     .bold()
                                     .foregroundStyle(course.type == .story || activeDarkModel ? .white : .black)
+                                    .font(.system(size: 25, weight: .bold, design: .rounded))
                                     .frame(width: 50, height: 50)
                                     .background(.clear)
                                     .overlay {
@@ -195,7 +198,7 @@ struct CourseDetailView: View {
                                                                                      green: 164/255,
                                                                                      blue: 178/255,
                                                                                      alpha: 1)))
-                    .font(.system(.callout, design: .rounded, weight: .light))
+                    .font(.system(size: 15, weight: .light, design: .rounded))
                     .multilineTextAlignment(.leading)
                 Spacer()
             }
@@ -243,7 +246,7 @@ struct CourseDetailView: View {
                                                                                                    green: 65/255,
                                                                                                    blue: 78/255,
                                                                                                    alpha: 1)))
-                            .font(.system(.title2, design: .rounded)).bold()
+                            .font(.system(size: 20, weight: .bold, design: .rounded))
                         Spacer()
                     }
                     ChangeSpeakersButtons(course: course, isFemale: $isFemale)
@@ -254,7 +257,11 @@ struct CourseDetailView: View {
         }
         .padding()
         .onAppear {
-            isDownloaded = fileManagerService.isCourseDownloaded(course: course)
+            do {
+                isDownloaded = try fileManagerService.isCourseDownloaded(course: course)
+            } catch {
+                print(error)
+            }
         }
     }
 }

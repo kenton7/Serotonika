@@ -18,7 +18,7 @@ class DownloadManager: ObservableObject {
             print("Общий прогресс загрузки: \(totalProgress)%")
         }
     }
-    
+        
     // Словарь для хранения прогресса загрузки каждого файла
         private var fileProgress: [String: Double] = [:]
     
@@ -37,7 +37,7 @@ class DownloadManager: ObservableObject {
         try await withThrowingTaskGroup(of: URL.self) { [unowned self] group in
             for lesson in lessons {
                 group.addTask {
-                    return try await self.asyncDownload(course: course, courseType: courseType, isFemale: isFemale ?? true, lesson: lesson)
+                    return try await self.downloadLesson(course: course, courseType: courseType, isFemale: isFemale ?? true, lesson: lesson)
                 }
             }
             for try await result in group {
@@ -47,7 +47,7 @@ class DownloadManager: ObservableObject {
         return results
     }
     
-    func asyncDownload(course: CourseAndPlaylistOfDayModel, courseType: Types, isFemale: Bool, lesson: Lesson) async throws -> URL {
+    func downloadLesson(course: CourseAndPlaylistOfDayModel, courseType: Types, isFemale: Bool, lesson: Lesson) async throws -> URL {
         
         var localURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
         
@@ -81,7 +81,7 @@ class DownloadManager: ObservableObject {
                 print("Загрузка файла \(lesson.lessonID): \(percentComplete)% завершено")
                 
                 // Обновляем прогресс конкретного файла
-                DispatchQueue.main.async {
+                DispatchQueue.main.async { [weak self] in
                     self?.updateProgress(for: lesson.lessonID, progress: percentComplete)
                 }
             }

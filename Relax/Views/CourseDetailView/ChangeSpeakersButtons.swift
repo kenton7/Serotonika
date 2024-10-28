@@ -32,7 +32,8 @@ struct ChangeSpeakersButtons: View {
                                                                              alpha: 1)) : Color(uiColor: .init(red: 161/255,
                                                                                                                green: 164/255,
                                                                                                                blue: 178/255, alpha: 1)))
-                            .font(.system(.title3, design: .rounded, weight: .bold))
+                            .font(.system(size: 20, weight: .bold, design: .rounded))
+                        
                     })
                     .padding()
                     .frame(maxWidth: .infinity)
@@ -53,7 +54,7 @@ struct ChangeSpeakersButtons: View {
                                                                                        alpha: 1)) : Color(uiColor: .init(red: 161/255,
                                                                                                                          green: 164/255,
                                                                                                                          blue: 178/255, alpha: 1)))
-                            .font(.system(.title3, design: .rounded, weight: .bold))
+                            .font(.system(size: 20, weight: .bold, design: .rounded))
                     })
                     .padding()
                     .frame(maxWidth: .infinity)

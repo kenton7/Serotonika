@@ -135,7 +135,7 @@ struct CustomTabBar: View {
                     } label: {
                         customTabItem(imageName: tab.iconName,
                                       title: tab.title,
-                                      isActive: (selection == tab as TabbedItems?)
+                                      isActive: (selectionBinding.wrappedValue == tab as TabbedItems?)
                         )
                     }
                     .frame(maxWidth: .infinity)
@@ -144,22 +144,14 @@ struct CustomTabBar: View {
             .frame(height: tabBarHeight)
             .background(
                 withAnimation(.easeInOut(duration: 0.7), {
-                    selection == .sleep ? Color(uiColor: .init(red: 3/255,
+                    selectionBinding.wrappedValue == .sleep ? Color(uiColor: .init(red: 3/255,
                                                                green: 23/255,
                                                                blue: 77/255,
                                                                alpha: 1)) : toogleDarkMode ? .black : .white
                 })
             )
-            
-//            GeometryReader {
-//                let size = $0.size
-//                if config2.showMiniPlayer {
-//                    MiniPlayerView(size: size)
-//                        .environmentObject(PlayerConfig2.shared)
-//                }
-//            }
         }
-        .shadow(color: .black.opacity(0.4), radius: 10, x: 0, y: 5)
+        .shadow(color: activeDarkModel ? .white.opacity(0.4) : .black.opacity(0.4), radius: 10, x: 0, y: 5)
         .ignoresSafeArea(.keyboard, edges: .bottom)
     }
 }
@@ -194,7 +186,7 @@ extension CustomTabBar {
                                                          blue: 253/255,
                                                          alpha: 1))
                                     : .gray))
-                .font(.system(size: 11, weight: .bold, design: .rounded))
+                .font(.system(size: 10, weight: .bold, design: .rounded))
         }
     }
 }

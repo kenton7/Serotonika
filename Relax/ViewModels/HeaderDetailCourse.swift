@@ -26,6 +26,9 @@ final class HeaderDetailCourse: ObservableObject {
     
     @Published var offsetY: CGFloat = .zero
     
+    @AppStorage("toogleDarkMode") private var toogleDarkMode = false
+    @AppStorage("activeDarkModel") private var activeDarkModel = false
+    
     @ViewBuilder
     func createHeaderView(course: CourseAndPlaylistOfDayModel, size: CGSize, safeArea: EdgeInsets) -> some View {
         let headerHeight = (size.height * 0.30) + safeArea.top
@@ -47,7 +50,8 @@ final class HeaderDetailCourse: ObservableObject {
                                      bottomTrailingRadius: 16,
                                      topTrailingRadius: 0,
                                      style: .continuous))
-                    .shadow(color: .black.opacity(0.7), radius: 5, x: 0, y: 3)
+                    //.shadow(color: .black.opacity(0.7), radius: 5, x: 0, y: 3)
+                    .shadow(color: self.activeDarkModel ? .gray.opacity(0.7) : .black.opacity(0.7), radius: 5, x: 0, y: 3)
 
                 
                 VStack(spacing: 15) {
@@ -73,15 +77,12 @@ final class HeaderDetailCourse: ObservableObject {
                         if self.offsetY > 0 {
                             self.offsetY = .zero
                         }
+                        let impactMed = UIImpactFeedbackGenerator(style: .soft)
+                        impactMed.impactOccurred()
                     }
-                
-                    //.frame(width: headerHeight * 0.5, height: headerHeight * 0.5)
                 }
-                //.padding(.top, safeArea.top)
-                //.padding(.bottom)
-                
             }
-            .shadow(color: .black.opacity(0.2), radius: 25)
+            .shadow(color: self.activeDarkModel ? .gray.opacity(0.2) : .black.opacity(0.2), radius: 25)
             .frame(height: max((headerHeight + self.offsetY), minimumHeaderHeight), alignment: .bottom)
             
         }

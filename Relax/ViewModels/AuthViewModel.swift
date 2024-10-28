@@ -258,6 +258,11 @@ extension AuthViewModel: ASAuthorizationControllerDelegate, ASAuthorizationContr
     // MARK: - ASAuthorizationControllerPresentationContextProviding Method
     
     func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
-        return UIApplication.shared.windows.first!
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let window = windowScene.windows.first {
+            return window
+        }
+        //return UIApplication.shared.windows.first!
+        return UIWindow()
     }
 }

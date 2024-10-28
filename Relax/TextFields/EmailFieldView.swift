@@ -25,7 +25,10 @@ struct EmailFieldView: View {
         ZStack(alignment: .leading) {
         TextField("", text: $email)
             .padding()
-            .background(activeDarkModel ? .black : Color(uiColor: .init(red: 242/255, green: 243/255, blue: 247/255, alpha: 1)))
+            .background(activeDarkModel ? Color(uiColor: .init(red: 41/255,
+                                                               green: 42/255,
+                                                               blue: 47/255,
+                                                               alpha: 1)) : Color(uiColor: .init(red: 242/255, green: 243/255, blue: 247/255, alpha: 1)))
             .clipShape(.rect(cornerRadius: 8))
             .padding()
             .keyboardType(.emailAddress)
@@ -56,6 +59,7 @@ struct EmailFieldView: View {
                 .foregroundStyle(isFocused ? .black : .secondary)
                 .animation(.spring, value: isFocused)
         }
+        .font(.system(size: 17, weight: .light, design: .rounded))
     }
 }
 

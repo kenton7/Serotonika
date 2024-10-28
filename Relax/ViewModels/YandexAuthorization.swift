@@ -26,7 +26,7 @@ final class YandexAuthorization: NSObject, ObservableObject, YandexLoginSDKObser
     
     static let shared = YandexAuthorization(databaseVM: ChangeDataInDatabase.shared)
     
-    private var authViewModel = AuthViewModel()
+    //private var authViewModel = AuthViewModel()
     
     private init(databaseVM: ChangeDataInDatabase) {
             self.databaseVM = databaseVM
@@ -137,6 +137,7 @@ final class YandexAuthorization: NSObject, ObservableObject, YandexLoginSDKObser
         Task {
             switch result {
             case .success(let userData):
+                print(userData.token)
                 self.userToken = userData.token
                 saveToken(userData.token)
                 notificationsService.rescheduleNotifications()
@@ -158,7 +159,7 @@ final class YandexAuthorization: NSObject, ObservableObject, YandexLoginSDKObser
                     
                     try await Database.database(url: .databaseURL).reference().child("users").child(yandexUserID).child("name").setValue(userName)
                     try await Database.database(url: .databaseURL).reference().child("users").child(yandexUserID).child("email").setValue(userInfo?.emails)
-                    try await Database.database(url: .databaseURL).reference().child("users").child(yandexUserID).child("phone").setValue(userInfo?.default_phone.number)
+                   // try await Database.database(url: .databaseURL).reference().child("users").child(yandexUserID).child("phone").setValue(userInfo?.default_phone.number)
                 } catch {
                     print("Error fetching Yandex user info: \(error)")
                 }
